@@ -9,14 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+@Slf4j
 @Validated
 @Service
-@Slf4j
-public record OrderApplicationServiceImpl(
-        OrderCreateCommandHandler orderCreateCommandHandler,
-        OrderTrackCommandHandler orderTrackCommandHandler)
-        implements OrderApplicationService {
+class OrderApplicationServiceImpl implements OrderApplicationService {
 
+    private final OrderCreateCommandHandler orderCreateCommandHandler;
+
+    private final OrderTrackCommandHandler orderTrackCommandHandler;
+
+    public OrderApplicationServiceImpl(OrderCreateCommandHandler orderCreateCommandHandler,
+                                       OrderTrackCommandHandler orderTrackCommandHandler) {
+        this.orderCreateCommandHandler = orderCreateCommandHandler;
+        this.orderTrackCommandHandler = orderTrackCommandHandler;
+    }
 
     @Override
     public CreateOrderResponse createOrder(CreateOrderCommand createOrderCommand) {
