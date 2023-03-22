@@ -17,6 +17,7 @@ import java.util.List;
 public class RestaurantApprovalResponse {
     String id;
     String sagaId;
+    String orderId;
     String restaurantId;
     Instant createdAt;
     OrderApprovalStatus orderApprovalStatus;

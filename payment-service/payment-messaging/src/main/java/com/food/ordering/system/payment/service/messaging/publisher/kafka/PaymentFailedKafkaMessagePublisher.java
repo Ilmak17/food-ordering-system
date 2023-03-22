@@ -1,0 +1,50 @@
+package com.food.ordering.system.payment.service.messaging.publisher.kafka;
+
+import com.food.ordering.system.kafka.order.avro.model.PaymentResponseAvroModel;
+import com.food.ordering.system.kafka.producer.KafkaMessageHelper;
+import com.food.ordering.system.kafka.producer.service.KafkaProducer;
+import com.food.ordering.system.payment.service.domain.config.PaymentServiceConfigData;
+import com.food.ordering.system.payment.service.domain.event.PaymentCancelledEvent;
+import com.food.ordering.system.payment.service.domain.event.PaymentFailedEvent;
+import com.food.ordering.system.payment.service.domain.ports.output.mesage.publisher.PaymentCancelledMessagePublisher;
+import com.food.ordering.system.payment.service.domain.ports.output.mesage.publisher.PaymentFailedMessagePublisher;
+import com.food.ordering.system.payment.service.messaging.mapper.PaymentMessagingDataMapper;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+public class PaymentFailedKafkaMessagePublisher implements PaymentFailedMessagePublisher {
+    PaymentMessagingDataMapper paymentMessagingDataMapper;
+    KafkaProducer<String, PaymentResponseAvroModel> kafkaProducer;
+    PaymentServiceConfigData configData;
+    KafkaMessageHelper kafkaMessageHelper;
+
+    @Override
+    public void publish(PaymentFailedEvent domainEvent) {
+        String orderId = domainEvent.getPayment().getOrderId().getValue().toString();
+        log.info("Received PaymentFailedEvent for order id: {}", orderId);
+
+        try {
+            PaymentResponseAvroModel paymentResponseAvroModel =
+                    paymentMessagingDataMapper.paymentFailedEventToPaymentResponseAvroModel(domainEvent);
+            kafkaProducer.send(configData.getPaymentResponseTopicName(),
+                    orderId,
+                    paymentResponseAvroModel,
+                    kafkaMessageHelper.getKafkaCallback(configData.getPaymentResponseTopicName(),
+                            paymentResponseAvroModel,
+                            orderId,
+                            "PaymentResponseAvroModel")
+            );
+            log.info("PaymentResponseAvroModel sent to kafka for order id: {}", orderId);
+        } catch (Exception e) {
+            log.info("Error while sending PaymentResponseAvroModel " +
+                    "message to kafka with order id: {}, error: {}", orderId, e.getMessage());
+        }
+    }
+}
