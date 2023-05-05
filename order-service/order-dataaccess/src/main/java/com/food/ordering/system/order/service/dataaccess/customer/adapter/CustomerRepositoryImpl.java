@@ -4,26 +4,31 @@ import com.food.ordering.system.order.service.dataaccess.customer.mapper.Custome
 import com.food.ordering.system.order.service.dataaccess.customer.repository.CustomerJpaRepository;
 import com.food.ordering.system.order.service.domain.entity.Customer;
 import com.food.ordering.system.order.service.domain.ports.output.repository.CustomerRepository;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Component
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@AllArgsConstructor
 public class CustomerRepositoryImpl implements CustomerRepository {
 
-    CustomerJpaRepository customerJpaRepository;
-    CustomerDataAccessMapper customerDataAccessMapper;
+    private final CustomerJpaRepository customerJpaRepository;
+    private final CustomerDataAccessMapper customerDataAccessMapper;
+
+    public CustomerRepositoryImpl(CustomerJpaRepository customerJpaRepository,
+                                  CustomerDataAccessMapper customerDataAccessMapper) {
+        this.customerJpaRepository = customerJpaRepository;
+        this.customerDataAccessMapper = customerDataAccessMapper;
+    }
 
     @Override
     public Optional<Customer> findCustomer(UUID customerId) {
-        return customerJpaRepository.findById(customerId)
-                .map(customerDataAccessMapper::createEntityToCustomer);
+        return customerJpaRepository.findById(customerId).map(customerDataAccessMapper::customerEntityToCustomer);
+    }
+
+    @Override
+    public Customer save(Customer customer) {
+        return customerDataAccessMapper.customerEntityToCustomer(
+                customerJpaRepository.save(customerDataAccessMapper.customerToCustomerEntity(customer)));
     }
 }
-

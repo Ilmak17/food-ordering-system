@@ -33,17 +33,17 @@ public class RestaurantDataAccessMapper {
                         new RestaurantDataAccessException("No restaurants found!"));
 
         List<Product> restaurantProducts = restaurantEntities.stream().map(entity ->
-                        Product.Builder.builder()
-                                .id(new ProductId(entity.getProductId()))
+                        Product.builder()
+                                .productId(new ProductId(entity.getProductId()))
                                 .name(entity.getProductName())
                                 .price(new Money(entity.getProductPrice()))
                                 .available(entity.getProductAvailable())
                                 .build())
                 .collect(Collectors.toList());
 
-        return Restaurant.Builder.builder()
-                .id(new RestaurantId(restaurantEntity.getId()))
-                .orderDetail(OrderDetail.Builder.builder()
+        return Restaurant.builder()
+                .restaurantId(new RestaurantId(restaurantEntity.getRestaurantId()))
+                .orderDetail(OrderDetail.builder()
                         .products(restaurantProducts)
                         .build())
                 .active(restaurantEntity.getRestaurantActive())
@@ -55,16 +55,16 @@ public class RestaurantDataAccessMapper {
                 .id(orderApproval.getId().getValue())
                 .restaurantId(orderApproval.getRestaurantId().getValue())
                 .orderId(orderApproval.getOrderId().getValue())
-                .status(orderApproval.getOrderApprovalStatus())
+                .status(orderApproval.getApprovalStatus())
                 .build();
     }
 
     public OrderApproval orderApprovalEntityToOrderApproval(OrderApprovalEntity orderApprovalEntity) {
-        return OrderApproval.Builder.builder()
-                .id(new OrderApprovalId(orderApprovalEntity.getId()))
+        return OrderApproval.builder()
+                .orderApprovalId(new OrderApprovalId(orderApprovalEntity.getId()))
                 .restaurantId(new RestaurantId(orderApprovalEntity.getRestaurantId()))
                 .orderId(new OrderId(orderApprovalEntity.getOrderId()))
-                .orderApprovalStatus(orderApprovalEntity.getStatus())
+                .approvalStatus(orderApprovalEntity.getStatus())
                 .build();
     }
 
